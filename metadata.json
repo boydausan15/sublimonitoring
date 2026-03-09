@@ -1,0 +1,5 @@
+{
+  "name": "Sublimation Production Monitoring System",
+  "description": "A modern Kanban-style workflow dashboard for tracking sublimation printing projects from design to completion.",
+  "requestFramePermissions": []
+}
