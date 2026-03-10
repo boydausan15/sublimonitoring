@@ -21,7 +21,13 @@ export default function App() {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<string | number | null>(null);
 
+  const isConfigMissing = !import.meta.env.VITE_FIREBASE_API_KEY;
+
   useEffect(() => {
+    if (isConfigMissing) {
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     const unsubscribe = projectService.subscribeToProjects((data) => {
       setProjects(data);
@@ -112,6 +118,23 @@ export default function App() {
   };
 
   const renderContent = () => {
+    if (isConfigMissing) {
+      return (
+        <div className="flex-1 flex flex-col items-center justify-center bg-slate-50 p-8 text-center">
+          <div className="w-20 h-20 bg-amber-100 text-amber-600 rounded-3xl flex items-center justify-center mb-6">
+            <Plus size={40} className="rotate-45" />
+          </div>
+          <h3 className="text-lg font-bold text-slate-900 mb-2">Configuration Required</h3>
+          <p className="text-slate-500 max-w-md mb-8">
+            The Firebase configuration is missing. If you have exported this to GitHub, please ensure you have set your environment variables (VITE_FIREBASE_API_KEY, etc.) in your deployment platform.
+          </p>
+          <div className="bg-white p-4 rounded-xl border border-slate-200 text-left text-xs font-mono text-slate-600">
+            Check the README.md for setup instructions.
+          </div>
+        </div>
+      );
+    }
+
     if (isLoading && projects.length === 0) {
       return (
         <div className="flex-1 flex items-center justify-center bg-slate-50">

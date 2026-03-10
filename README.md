@@ -1,20 +1,56 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# LJ PRINTS - Production Management System
 
-# Run and deploy your AI Studio app
+This application is a full-stack production management system built with React, Vite, Express, and Firebase.
 
-This contains everything you need to run your app locally.
+## 🚀 Getting Started
 
-View your app in AI Studio: https://ai.studio/apps/85c68b68-fbf2-4392-956d-0411212f8cb1
+To run this application locally or deploy it to a platform like Vercel, Railway, or Render, follow these steps:
 
-## Run Locally
+### 1. Environment Variables
 
-**Prerequisites:**  Node.js
+You must configure your Firebase credentials. Create a `.env` file in the root directory (or set these in your deployment platform's environment variables):
 
+```env
+# Firebase Configuration
+VITE_FIREBASE_API_KEY=your_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+# Gemini API Key (Optional, if using AI features)
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+### 2. Installation
+
+```bash
+npm install
+```
+
+### 3. Development
+
+```bash
+npm run dev
+```
+
+### 4. Production Build & Start
+
+```bash
+npm run build
+npm start
+```
+
+## 🌐 Deployment Note
+
+This is a **Full-Stack** application with an Express backend. It **cannot** be hosted on static-only platforms like GitHub Pages. 
+
+Please use a platform that supports Node.js (e.g., Vercel, Render, Railway, or Google Cloud Run).
+
+## 🛠 Tech Stack
+
+- **Frontend**: React 19, Tailwind CSS, Lucide React, Motion
+- **Backend**: Express.js
+- **Database**: Firebase Firestore
+- **Build Tool**: Vite
