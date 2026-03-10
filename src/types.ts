@@ -11,7 +11,7 @@ export type ProjectStatus =
   | 'Completed';
 
 export interface Project {
-  id: number;
+  id: string | number;
   tracking_number: string;
   project_name: string;
   customer_name: string;
@@ -40,3 +40,16 @@ export const STAGES: ProjectStatus[] = [
   'Packing',
   'Completed'
 ];
+
+export type StaffRole = 'admin' | 'subadmin' | 'staff';
+export type StaffJob = 'SUBADMIN' | 'DESIGNER' | 'PACKING' | 'PRINTER' | 'SEWER' | 'CUTTER';
+
+export interface Staff {
+  id: string;
+  email: string;
+  name?: string;
+  role: StaffRole;
+  job: StaffJob;
+  active: boolean;
+  created_at: string;
+}

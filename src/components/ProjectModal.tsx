@@ -7,7 +7,7 @@ interface ProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (project: Partial<Project>) => void;
-  onDelete?: (id: number) => void;
+  onDelete?: (id: string | number) => void;
   project?: Project | null;
   mode: 'create' | 'edit' | 'view';
 }

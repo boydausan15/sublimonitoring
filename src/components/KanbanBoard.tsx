@@ -19,11 +19,11 @@ import ProjectCard from "./ProjectCard";
 
 interface KanbanBoardProps {
   projects: Project[];
-  onUpdateStatus: (id: number, status: ProjectStatus) => void;
+  onUpdateStatus: (id: string | number, status: ProjectStatus) => void;
   onView: (project: Project) => void;
   onEdit: (project: Project) => void;
-  onDelete: (id: number) => void;
-  onMove: (id: number, direction: 'prev' | 'next') => void;
+  onDelete: (id: string | number) => void;
+  onMove: (id: string | number, direction: 'prev' | 'next') => void;
 }
 
 export default function KanbanBoard({ projects, onUpdateStatus, onView, onEdit, onDelete, onMove }: KanbanBoardProps) {

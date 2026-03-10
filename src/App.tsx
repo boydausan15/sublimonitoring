@@ -3,9 +3,12 @@ import Sidebar, { MenuItem } from './components/Sidebar';
 import TopBar from './components/TopBar';
 import KanbanBoard from './components/KanbanBoard';
 import Dashboard from './components/Dashboard';
+import AdminPanel from './components/AdminPanel';
 import ProjectModal from './components/ProjectModal';
+import ConfirmationModal from './components/ConfirmationModal';
 import { Project, ProjectStatus, STAGES } from './types';
 import { FolderKanban, Plus } from 'lucide-react';
+import { projectService } from './services/projectService';
 
 export default function App() {
   const [activeItem, setActiveItem] = useState<MenuItem>('Dashboard');
@@ -15,54 +18,23 @@ export default function App() {
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<string | number | null>(null);
 
   useEffect(() => {
-    fetchProjects();
-  }, []);
-
-  const fetchProjects = async (retries = 10) => {
     setIsLoading(true);
-    try {
-      const url = '/api/projects';
-      console.log(`Fetching projects from ${url}... (Attempt ${11 - retries})`);
-      
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
-      }
-      
-      const data = await response.json();
+    const unsubscribe = projectService.subscribeToProjects((data) => {
       setProjects(data);
-      console.log("Projects fetched successfully:", data.length, "items");
-    } catch (error) {
-      console.error('Fetch error details:', error);
-      
-      if (retries > 0) {
-        // Faster retries initially (500ms), then progressive
-        const delay = retries > 7 ? 500 : Math.min((11 - retries) * 1000, 5000);
-        console.log(`Retrying in ${delay}ms...`);
-        setTimeout(() => fetchProjects(retries - 1), delay);
-      } else {
-        console.error("All fetch attempts failed.");
-      }
-    } finally {
       setIsLoading(false);
-    }
-  };
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleCreateProject = async (projectData: Partial<Project>) => {
     try {
-      const response = await fetch('/api/projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(projectData)
-      });
-      if (response.ok) {
-        fetchProjects();
-        setIsModalOpen(false);
-      }
+      await projectService.createProject(projectData);
+      setIsModalOpen(false);
     } catch (error) {
       console.error('Error creating project:', error);
     }
@@ -71,50 +43,37 @@ export default function App() {
   const handleUpdateProject = async (projectData: Partial<Project>) => {
     if (!selectedProject) return;
     try {
-      const response = await fetch(`/api/projects/${selectedProject.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(projectData)
-      });
-      if (response.ok) {
-        fetchProjects();
-        setIsModalOpen(false);
-      }
+      await projectService.updateProject(selectedProject.id, projectData);
+      setIsModalOpen(false);
     } catch (error) {
       console.error('Error updating project:', error);
     }
   };
 
-  const handleUpdateStatus = async (id: number, status: ProjectStatus) => {
+  const handleUpdateStatus = async (id: string | number, status: ProjectStatus) => {
     try {
-      const response = await fetch(`/api/projects/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-      });
-      if (response.ok) {
-        setProjects(prev => prev.map(p => p.id === id ? { ...p, status } : p));
-      }
+      await projectService.updateProject(id, { status });
     } catch (error) {
       console.error('Error updating status:', error);
     }
   };
 
-  const handleDeleteProject = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this project?')) return;
+  const handleDeleteProject = (id: string | number) => {
+    setProjectToDelete(id);
+    setIsConfirmOpen(true);
+  };
+
+  const confirmDeleteProject = async () => {
+    if (!projectToDelete) return;
     try {
-      const response = await fetch(`/api/projects/${id}`, {
-        method: 'DELETE'
-      });
-      if (response.ok) {
-        setProjects(prev => prev.filter(p => p.id !== id));
-      }
+      await projectService.deleteProject(projectToDelete);
+      setProjectToDelete(null);
     } catch (error) {
       console.error('Error deleting project:', error);
     }
   };
 
-  const handleMoveProject = (id: number, direction: 'prev' | 'next') => {
+  const handleMoveProject = (id: string | number, direction: 'prev' | 'next') => {
     const project = projects.find(p => p.id === id);
     if (!project) return;
 
@@ -183,7 +142,7 @@ export default function App() {
             Create First Project
           </button>
           <button 
-            onClick={() => fetchProjects()}
+            onClick={() => window.location.reload()}
             className="mt-4 text-indigo-600 text-sm font-bold hover:underline"
           >
             Retry Connection
@@ -206,6 +165,8 @@ export default function App() {
             onMove={handleMoveProject}
           />
         );
+      case 'Admin Panel':
+        return <AdminPanel />;
       default:
         return (
           <div className="flex-1 flex items-center justify-center bg-slate-50 text-slate-400 font-medium italic">
@@ -235,6 +196,15 @@ export default function App() {
         project={selectedProject}
         onDelete={handleDeleteProject}
         onSubmit={modalMode === 'create' ? handleCreateProject : handleUpdateProject}
+      />
+
+      <ConfirmationModal 
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={confirmDeleteProject}
+        title="Delete Project"
+        message="Are you sure you want to delete this project? This action cannot be undone and all production data for this project will be lost."
+        confirmText="Delete Project"
       />
     </div>
   );

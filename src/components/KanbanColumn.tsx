@@ -15,8 +15,8 @@ interface KanbanColumnProps {
   projects: Project[];
   onView: (project: Project) => void;
   onEdit: (project: Project) => void;
-  onDelete: (id: number) => void;
-  onMove: (id: number, direction: 'prev' | 'next') => void;
+  onDelete: (id: string | number) => void;
+  onMove: (id: string | number, direction: 'prev' | 'next') => void;
 }
 
 export default function KanbanColumn({ status, projects, onView, onEdit, onDelete, onMove }: KanbanColumnProps) {
